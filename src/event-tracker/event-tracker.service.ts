@@ -1,10 +1,6 @@
 import { AbiItem } from 'web3-utils/types';
 import Web3 from 'web3';
-import {
-  getContractDeploymentBlock,
-  getEventsAbi,
-  getHmyLogs,
-} from './api';
+import { getContractDeploymentBlock, getEventsAbi, getHmyLogs } from './api';
 
 import EventEmitter = require('events');
 import { Injectable, Logger } from '@nestjs/common';
@@ -32,14 +28,14 @@ export interface IEventTrackerService {
   web3: Web3;
 }
 
-const sleep = ms => new Promise(res => setTimeout(res, ms));
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 @Injectable()
 export class EventTrackerService {
   private readonly logger = new Logger(EventTrackerService.name);
   dbCollectionPrefix = '';
 
-  chain: 'hmy' | 'eth' | 'bsc' = "eth";
+  chain: 'hmy' | 'eth' | 'bsc' = 'eth';
 
   events: any[] = [];
 
@@ -63,16 +59,17 @@ export class EventTrackerService {
 
   web3: Web3;
 
-  constructor(
-    params: IEventTrackerService,
-  ) {
+  constructor(params: IEventTrackerService) {
     this.web3 = params.web3;
     this.chain = params.chain || 'eth';
 
     this.contractAddress = params.contractAddress;
     this.abiEvents = getEventsAbi(this.web3, params.contractAbi);
     this.getEventCallback = params.getEventCallback;
-    this.contract = new this.web3.eth.Contract(params.contractAbi, params.contractAddress);
+    this.contract = new this.web3.eth.Contract(
+      params.contractAbi,
+      params.contractAddress,
+    );
     this.eventName = params.eventName || '';
   }
 
@@ -139,7 +136,7 @@ export class EventTrackerService {
 
         let result = [];
 
-        if (this.chain === "hmy") {
+        if (this.chain === 'hmy') {
           const res = await getHmyLogs({
             fromBlock: '0x' + from.toString(16),
             toBlock: '0x' + to.toString(16),
@@ -148,10 +145,13 @@ export class EventTrackerService {
 
           result = res.result;
         } else {
-          result = await this.contract.getPastEvents(this.eventName || "allEvents", {
-            fromBlock: '0x' + from.toString(16),
-            toBlock: '0x' + to.toString(16),
-          });
+          result = await this.contract.getPastEvents(
+            this.eventName || 'allEvents',
+            {
+              fromBlock: '0x' + from.toString(16),
+              toBlock: '0x' + to.toString(16),
+            },
+          );
         }
 
         const events = [];
@@ -168,7 +168,7 @@ export class EventTrackerService {
             const returnValues = this.web3.eth.abi.decodeLog(
               abiItem.inputs,
               item.data,
-              topics.slice(1)
+              topics.slice(1),
             );
 
             events.push({
@@ -186,7 +186,9 @@ export class EventTrackerService {
 
           // send events to other services via eventsEmitter
           // events.forEach(event => this.eventEmitter.emit(event.name, event));
-          await Promise.all(events.map(async e => await this.getEventCallback(e)));
+          await Promise.all(
+            events.map(async (e) => await this.getEventCallback(e)),
+          );
         }
 
         // cache - disabled
@@ -207,7 +209,10 @@ export class EventTrackerService {
   };
 
   getProgress = () =>
-    ((this.lastBlock - this.startBlock) / (this.lastNodeBlock - this.startBlock)).toFixed(4);
+    (
+      (this.lastBlock - this.startBlock) /
+      (this.lastNodeBlock - this.startBlock)
+    ).toFixed(4);
 
   getInfo = () => {
     return {

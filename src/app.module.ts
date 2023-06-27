@@ -7,7 +7,7 @@ import configuration from './config';
 import entities from './typeorm';
 import { TransferTrackerModule } from './transfer-tracker/transfer-tracker.module';
 import { Web3Module } from 'nest-web3';
-import { PrometheusModule } from "@willsoto/nestjs-prometheus";
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { PrometheusModule } from "@willsoto/nestjs-prometheus";
         configService.get('eth'),
         configService.get('bsc'),
       ],
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -39,9 +39,9 @@ import { PrometheusModule } from "@willsoto/nestjs-prometheus";
     }),
     Web3Module,
     TransferTrackerModule,
-    PrometheusModule.register()
+    PrometheusModule.register(),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
