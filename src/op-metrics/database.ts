@@ -6,6 +6,7 @@ export enum NETWORK_TYPE {
   ETHEREUM = 'ETHEREUM',
   BINANCE = 'BINANCE',
   ARBITRUM = 'ARBITRUM',
+  HARMONY = 'HARMONY',
 }
 
 export enum OPERATION_TYPE {
