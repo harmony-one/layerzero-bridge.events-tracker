@@ -27,6 +27,7 @@ export class DBService {
   constructor() {
     // Init admin
     try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const serviceAccount = require('../../keys/keys.json');
 
       admin.initializeApp({
@@ -44,7 +45,7 @@ export class DBService {
   public getCollectionDataWithLimit = async (
     collectionName: string,
     orderBy: string,
-    limit: number
+    limit: number,
   ): Promise<any> => {
     try {
       const snapshot = await this.db
@@ -52,20 +53,18 @@ export class DBService {
         .orderBy(orderBy, 'desc')
         .limit(limit)
         .get();
-      return snapshot.docs.map(doc => doc.data());
+      return snapshot.docs.map((doc) => doc.data());
     } catch (err) {
       console.log('getCollectionDataWithLimit: ', err);
       return [];
     }
   };
 
-  public getOperationsCount = async (
-    filters: {
-      network: NETWORK_TYPE;
-      type: OPERATION_TYPE;
-      status: STATUS;
-    }
-  ): Promise<any> => {
+  public getOperationsCount = async (filters: {
+    network: NETWORK_TYPE;
+    type: OPERATION_TYPE;
+    status: STATUS;
+  }): Promise<any> => {
     try {
       const snapshot = await this.db
         .collection('operations')

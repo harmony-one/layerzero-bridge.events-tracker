@@ -6,10 +6,7 @@ import { Transfers } from 'src/typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [
-    ConfigModule,
-    TypeOrmModule.forFeature([Transfers]),
-  ],
+  imports: [ConfigModule, TypeOrmModule.forFeature([Transfers])],
   providers: [TransferTrackerService],
   exports: [TransferTrackerService],
   controllers: [TransferTrackerController],

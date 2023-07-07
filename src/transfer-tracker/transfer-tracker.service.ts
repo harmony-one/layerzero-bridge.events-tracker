@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventTrackerService } from 'src/event-tracker/event-tracker.service';
 import { abi } from '../abi';
-import { Web3Service } from "nest-web3";
+import { Web3Service } from 'nest-web3';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transfers } from 'src/typeorm';
 import { Repository } from 'typeorm';
@@ -29,7 +29,7 @@ enum CHAIN {
 }
 
 interface IEventFilterParams extends IBridgeEvent {
-  chain: CHAIN
+  chain: CHAIN;
 }
 
 @Injectable()
@@ -44,7 +44,7 @@ export class TransferTrackerService {
     [CHAIN.BSC]: [],
     [CHAIN.ETH]: [],
     [CHAIN.HMY]: [],
-  }
+  };
 
   constructor(
     private configService: ConfigService,
@@ -59,15 +59,21 @@ export class TransferTrackerService {
       contractAddress: this.configService.get(CHAIN.BSC).contract,
       eventName: 'PacketReceived',
       getEventCallback: async (res) => {
-        if (res?.name === 'PacketReceived' && res?.returnValues?.srcChainId == '116') {
+        if (
+          res?.name === 'PacketReceived' &&
+          res?.returnValues?.srcChainId == '116'
+        ) {
           try {
-            const event = await parseTx(res.transactionHash, web3Service.getClient(CHAIN.BSC));
+            const event = await parseTx(
+              res.transactionHash,
+              web3Service.getClient(CHAIN.BSC),
+            );
             this.events[CHAIN.BSC].push({ ...event, dstChainId: '102' });
           } catch (e) {
             this.logger.error('Error parse PacketReceived', e);
           }
         }
-      }
+      },
     });
 
     this.bscEventTracker.start();
@@ -79,15 +85,21 @@ export class TransferTrackerService {
       contractAddress: this.configService.get(CHAIN.ETH).contract,
       eventName: 'PacketReceived',
       getEventCallback: async (res) => {
-        if (res?.name === 'PacketReceived' && res?.returnValues?.srcChainId == '116') {
+        if (
+          res?.name === 'PacketReceived' &&
+          res?.returnValues?.srcChainId == '116'
+        ) {
           try {
-            const event = await parseTx(res.transactionHash, web3Service.getClient(CHAIN.ETH));
+            const event = await parseTx(
+              res.transactionHash,
+              web3Service.getClient(CHAIN.ETH),
+            );
             this.events[CHAIN.ETH].push({ ...event, dstChainId: '101' });
           } catch (e) {
             this.logger.error('Error parse PacketReceived', e);
           }
         }
-      }
+      },
     });
 
     this.ethEventTracker.start();
@@ -101,13 +113,16 @@ export class TransferTrackerService {
       getEventCallback: async (res) => {
         if (res?.name === 'PacketReceived') {
           try {
-            const event = await parseTx(res.transactionHash, web3Service.getClient(CHAIN.HMY));
+            const event = await parseTx(
+              res.transactionHash,
+              web3Service.getClient(CHAIN.HMY),
+            );
             this.events[CHAIN.HMY].push({ ...event, dstChainId: '116' });
           } catch (e) {
             this.logger.error('Error parse PacketReceived', e);
           }
         }
-      }
+      },
     });
 
     this.hmyEventTracker.start();
@@ -130,21 +145,22 @@ export class TransferTrackerService {
       hmy: {
         info: this.hmyEventTracker.getInfo(),
         events: this.events[CHAIN.HMY].length,
-      }
-    }
-  }
+      },
+    };
+  };
 
   getEvents = (filters: IEventFilterParams) => {
     const { chain = CHAIN.HMY, ...params } = filters;
 
     let events = this.events[chain];
 
-    events = events.filter(e => {
+    events = events.filter((e) => {
       return Object.keys(params).every(
-        key => String(e[key]).toUpperCase() === String(params[key]).toUpperCase()
-      )
-    })
+        (key) =>
+          String(e[key]).toUpperCase() === String(params[key]).toUpperCase(),
+      );
+    });
 
     return events.slice(0, 10);
-  }
+  };
 }

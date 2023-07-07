@@ -6,8 +6,8 @@ import { OperationsMetricsService } from './op-metrics.service';
 @Controller('tracker')
 export class OperationsMetricsController {
   constructor(
-    private readonly operationsMetricsService: OperationsMetricsService
-  ) { }
+    private readonly operationsMetricsService: OperationsMetricsService,
+  ) {}
 
   @Get('/info')
   getInfo() {
