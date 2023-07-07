@@ -6,7 +6,9 @@ import { sleep } from '../utils';
 export const getContractDeploymentBlock = async (address): Promise<number> => {
   try {
     const contract: any = await axios.get(
-      `${process.env.HMY_EXPLORER_API}/shard/0/address/${address.toLowerCase()}/contract`
+      `${
+        process.env.HMY_EXPLORER_API
+      }/shard/0/address/${address.toLowerCase()}/contract`,
     );
 
     return Number(contract.data.blockNumber);
@@ -39,7 +41,9 @@ export const getHmyLogs = async (params: IParams) => {
 };
 
 export const getEvent = (web3: Web3, abi: AbiItem[], eventName: string) => {
-  const abiItem: AbiItem = abi.find(a => a.type === 'event' && a.name === eventName);
+  const abiItem: AbiItem = abi.find(
+    (a) => a.type === 'event' && a.name === eventName,
+  );
 
   return { ...abiItem, signature: web3.eth.abi.encodeEventSignature(abiItem) };
 };
@@ -76,23 +80,23 @@ export const getHmyTransactionByHash = async (hash: string) => {
 
 export const getEventsAbi = (web3: Web3, abi: AbiItem[]) => {
   const extAbi = abi
-    .filter(a => a.type === 'event')
-    .map(abiItem => ({
+    .filter((a) => a.type === 'event')
+    .map((abiItem) => ({
       ...abiItem,
       signature: web3.eth.abi.encodeEventSignature(abiItem).toLowerCase(),
     }));
 
   const res = {};
 
-  extAbi.forEach(abiItem => (res[abiItem.signature] = abiItem));
+  extAbi.forEach((abiItem) => (res[abiItem.signature] = abiItem));
 
   return res;
 };
 
 export const getEventsAbiArray = (web3: Web3, abi: AbiItem[]) => {
   return abi
-    .filter(a => a.type === 'event')
-    .map(abiItem => ({
+    .filter((a) => a.type === 'event')
+    .map((abiItem) => ({
       ...abiItem,
       signature: web3.eth.abi.encodeEventSignature(abiItem).toLowerCase(),
     }));
@@ -107,32 +111,36 @@ export const errorResponse = [
   'The transaction is still not confirmed after 20 attempts',
   'replacement transaction underpriced',
   'Client network socket disconnected before secure TLS connection was established',
-].map(text => text.toLowerCase());
+].map((text) => text.toLowerCase());
 
-export const rpcErrorMessage = error => {
+export const rpcErrorMessage = (error) => {
   if (error && error.message) {
-    return errorResponse.some(text => error.message.toLowerCase().includes(text));
+    return errorResponse.some((text) =>
+      error.message.toLowerCase().includes(text),
+    );
   }
 
   if (typeof error === 'string') {
-    return errorResponse.some(text => error.toLowerCase().includes(text));
+    return errorResponse.some((text) => error.toLowerCase().includes(text));
   }
 
   return false;
 };
 
-export const rpcErrorHandler = (func: () => Promise<any>) => async (...args) => {
-  try {
-    return func.apply(this, args);
-  } catch (e) {
-    if (rpcErrorMessage(e)) {
-      // log.error('rpcErrorHandler exception', { erc20TokenAddr, error: e });
+export const rpcErrorHandler =
+  (func: () => Promise<any>) =>
+  async (...args) => {
+    try {
+      return func.apply(this, args);
+    } catch (e) {
+      if (rpcErrorMessage(e)) {
+        // log.error('rpcErrorHandler exception', { erc20TokenAddr, error: e });
 
-      await sleep(10000);
+        await sleep(10000);
 
-      return await rpcErrorHandler(func).apply(this, args);
-    } else {
-      throw e;
+        return await rpcErrorHandler(func).apply(this, args);
+      } else {
+        throw e;
+      }
     }
-  }
-};
+  };

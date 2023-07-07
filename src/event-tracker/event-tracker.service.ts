@@ -32,7 +32,7 @@ export interface IEventTrackerService {
   web3: Web3;
 }
 
-const sleep = ms => new Promise(res => setTimeout(res, ms));
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 @Injectable()
 export class EventTrackerService {

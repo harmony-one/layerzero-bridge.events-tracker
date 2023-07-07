@@ -5,9 +5,7 @@ import { TransferTrackerService } from './transfer-tracker.service';
 @ApiTags('tracker')
 @Controller('tracker')
 export class TransferTrackerController {
-  constructor(
-    private readonly trackerService: TransferTrackerService
-  ) { }
+  constructor(private readonly trackerService: TransferTrackerService) {}
 
   @Get('/info')
   getInfo() {
@@ -18,9 +16,11 @@ export class TransferTrackerController {
   getLife() {
     const info = this.trackerService.getInfo();
 
-    return info.bsc.info.progress === "1.0000" &&
-      info.eth.info.progress === "1.0000" &&
-      info.hmy.info.progress === "1.0000";
+    return (
+      info.bsc.info.progress === '1.0000' &&
+      info.eth.info.progress === '1.0000' &&
+      info.hmy.info.progress === '1.0000'
+    );
   }
 
   @Get('/events')
