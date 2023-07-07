@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Counter } from 'prom-client';
+import { Gauge } from 'prom-client';
 import { InjectMetric } from '@willsoto/nestjs-prometheus';
 import { DBService, NETWORK_TYPE, OPERATION_TYPE, STATUS } from './database';
 
@@ -13,21 +13,21 @@ enum CHAIN {
 export class OperationsMetricsService {
   private readonly logger = new Logger(OperationsMetricsService.name);
   private database: DBService;
-  private syncInterval = 1000 * 60;
+  private syncInterval = 1000 * 30;
 
   constructor(
-    @InjectMetric('operations_hmy_to_eth_success_count')
-    public hmyToEthSuccessCount: Counter<string>,
-    @InjectMetric('operations_hmy_to_bsc_success_count')
-    public hmyToBscSuccessCount: Counter<string>,
-    @InjectMetric('operations_hmy_to_arb_success_count')
-    public hmyToArbSuccessCount: Counter<string>,
-    @InjectMetric('operations_eth_to_hmy_success_count')
-    public ethToHmySuccessCount: Counter<string>,
-    @InjectMetric('operations_bsc_to_hmy_success_count')
-    public bscToHmySuccessCount: Counter<string>,
-    @InjectMetric('operations_arb_to_hmy_success_count')
-    public arbToHmySuccessCount: Counter<string>,
+    @InjectMetric('operations_hmy_to_eth_success_gauge')
+    public hmyToEthSuccessGauge: Gauge<string>,
+    @InjectMetric('operations_hmy_to_bsc_success_gauge')
+    public hmyToBscSuccessGauge: Gauge<string>,
+    @InjectMetric('operations_hmy_to_arb_success_gauge')
+    public hmyToArbSuccessGauge: Gauge<string>,
+    @InjectMetric('operations_eth_to_hmy_success_gauge')
+    public ethToHmySuccessGauge: Gauge<string>,
+    @InjectMetric('operations_bsc_to_hmy_success_gauge')
+    public bscToHmySuccessGauge: Gauge<string>,
+    @InjectMetric('operations_arb_to_hmy_success_gauge')
+    public arbToHmySuccessGauge: Gauge<string>,
   ) {
     this.database = new DBService();
 
@@ -35,7 +35,7 @@ export class OperationsMetricsService {
   }
 
   updateCounterByConfig = async (params: {
-    counter: Counter<string>;
+    counter: Gauge<string>;
     type: OPERATION_TYPE;
     network: NETWORK_TYPE;
     status: STATUS;
@@ -48,9 +48,7 @@ export class OperationsMetricsService {
       status,
     });
 
-    const lastCount = (await counter.get()).values[0].value;
-
-    counter.inc(newCount - lastCount);
+    counter.set(newCount);
   };
 
   updateCounters = async () => {
@@ -59,42 +57,42 @@ export class OperationsMetricsService {
         type: OPERATION_TYPE.ONE_ETH,
         network: NETWORK_TYPE.ETHEREUM,
         status: STATUS.SUCCESS,
-        counter: this.hmyToEthSuccessCount,
+        counter: this.hmyToEthSuccessGauge,
       });
 
       await this.updateCounterByConfig({
         type: OPERATION_TYPE.ONE_ETH,
         network: NETWORK_TYPE.BINANCE,
         status: STATUS.SUCCESS,
-        counter: this.hmyToBscSuccessCount,
+        counter: this.hmyToBscSuccessGauge,
       });
 
       await this.updateCounterByConfig({
         type: OPERATION_TYPE.ONE_ETH,
         network: NETWORK_TYPE.ARBITRUM,
         status: STATUS.SUCCESS,
-        counter: this.hmyToArbSuccessCount,
+        counter: this.hmyToArbSuccessGauge,
       });
 
       await this.updateCounterByConfig({
         type: OPERATION_TYPE.ETH_ONE,
         network: NETWORK_TYPE.ETHEREUM,
         status: STATUS.SUCCESS,
-        counter: this.ethToHmySuccessCount,
+        counter: this.ethToHmySuccessGauge,
       });
 
       await this.updateCounterByConfig({
         type: OPERATION_TYPE.ETH_ONE,
         network: NETWORK_TYPE.BINANCE,
         status: STATUS.SUCCESS,
-        counter: this.bscToHmySuccessCount,
+        counter: this.bscToHmySuccessGauge,
       });
 
       await this.updateCounterByConfig({
         type: OPERATION_TYPE.ETH_ONE,
         network: NETWORK_TYPE.ARBITRUM,
         status: STATUS.SUCCESS,
-        counter: this.arbToHmySuccessCount,
+        counter: this.arbToHmySuccessGauge,
       });
     } catch (e) {
       this.logger.error('updateCounters error', e);
