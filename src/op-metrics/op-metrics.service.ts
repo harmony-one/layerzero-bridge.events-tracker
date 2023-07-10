@@ -10,12 +10,14 @@ export class OperationsMetricsService {
   private syncInterval = 1000 * 30;
 
   constructor(
-    @InjectMetric('lzevent_operations_success')
+    @InjectMetric('lzevent_operations')
     public successGauge: Gauge<string>,
   ) {
     this.database = new DBService();
 
-    this.updateCounters();
+    this.updateCounters(STATUS.WAITING);
+    this.updateCounters(STATUS.ERROR);
+    this.updateCounters(STATUS.SUCCESS);
   }
 
   updateCounterByConfig = async (params: {
@@ -35,51 +37,51 @@ export class OperationsMetricsService {
       type == OPERATION_TYPE.ONE_ETH ? NETWORK_TYPE.HARMONY : network;
     const to = type == OPERATION_TYPE.ETH_ONE ? NETWORK_TYPE.HARMONY : network;
 
-    this.successGauge.set({ from, to }, newCount);
+    this.successGauge.set({ from, to, status }, newCount);
   };
 
-  updateCounters = async () => {
+  updateCounters = async (status: STATUS) => {
     try {
       await this.updateCounterByConfig({
         type: OPERATION_TYPE.ONE_ETH,
         network: NETWORK_TYPE.ETHEREUM,
-        status: STATUS.SUCCESS,
+        status,
       });
 
       await this.updateCounterByConfig({
         type: OPERATION_TYPE.ONE_ETH,
         network: NETWORK_TYPE.BINANCE,
-        status: STATUS.SUCCESS,
+        status,
       });
 
       await this.updateCounterByConfig({
         type: OPERATION_TYPE.ONE_ETH,
         network: NETWORK_TYPE.ARBITRUM,
-        status: STATUS.SUCCESS,
+        status,
       });
 
       await this.updateCounterByConfig({
         type: OPERATION_TYPE.ETH_ONE,
         network: NETWORK_TYPE.ETHEREUM,
-        status: STATUS.SUCCESS,
+        status,
       });
 
       await this.updateCounterByConfig({
         type: OPERATION_TYPE.ETH_ONE,
         network: NETWORK_TYPE.BINANCE,
-        status: STATUS.SUCCESS,
+        status,
       });
 
       await this.updateCounterByConfig({
         type: OPERATION_TYPE.ETH_ONE,
         network: NETWORK_TYPE.ARBITRUM,
-        status: STATUS.SUCCESS,
+        status,
       });
     } catch (e) {
       this.logger.error('updateCounters error', e);
     }
 
-    setTimeout(this.updateCounters, this.syncInterval);
+    setTimeout(this.updateCounters.bind(this, status), this.syncInterval);
   };
 
   getInfo() {

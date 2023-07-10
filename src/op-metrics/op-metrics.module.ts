@@ -9,9 +9,9 @@ import { makeGaugeProvider } from '@willsoto/nestjs-prometheus';
   providers: [
     OperationsMetricsService,
     makeGaugeProvider({
-      name: 'lzevent_operations_success',
+      name: 'lzevent_operations',
       help: 'successful operations',
-      labelNames: ['from', 'to'],
+      labelNames: ['from', 'to', 'status'],
     }),
   ],
   exports: [OperationsMetricsService],
